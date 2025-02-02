@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Data Collection Progress Dashboard</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
+  <!-- Bootstrap CSS (free and hosted on CDN) -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: #f8f9fa;
+      padding-top: 20px;
+    }
+    .progress-container {
+      margin-bottom: 30px;
+      padding: 20px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .student-name {
+      font-weight: 500;
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="text-center mb-5">Data Collection Progress Dashboard</h1>
+    <!-- Progress bars will be dynamically inserted here -->
+    <div id="progress-bars"></div>
+  </div>
+
+  <!-- Tabletop.js to fetch Google Sheet data (free library) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tabletop.js/1.5.1/tabletop.min.js"></script>
+  <script>
+    // When the DOM is loaded, initialize the app
+    window.addEventListener('DOMContentLoaded', init);
+
+    function init() {
+      // Replace YOUR_SHEET_ID with your actual Google Sheet ID.
+      // For example, if your sheet URL is:
+      // https://docs.google.com/spreadsheets/d/1A2B3C4D5E6F7G8H9I0J/pubhtml
+      // then YOUR_SHEET_ID is "1A2B3C4D5E6F7G8H9I0J"
+      var publicSpreadsheetUrl = 'https://docs.google.com/spreadsheets/d/1NY6vt_qQc_gtVFv-mvZAezvEtyEQgwhWBptoaDXd2jA/edit?gid=0#gid=0';
+
+      // We want to fetch a specific sheet named "Sheet1" from the spreadsheet.
+      Tabletop.init({
+        key: publicSpreadsheetUrl,
+        callback: processData,
+        wanted: ["Sheet1"],
+        simpleSheet: false  // We set this to false to target a specific sheet.
+      });
+    }
+
+    function processData(data) {
+      // Access the data from "Sheet1"
+      var sheetData = data["Sheet1"].elements; 
+      console.log("Sheet1 data:", sheetData);
+
+      // Group submissions by the trusted "Email address".
+      // Also, we grab the manually entered name ("Data Collector Name / Veri Toplayan Kişinin Adı")
+      // but use the email as the key since it’s automatically captured.
+      var studentData = {};
+      sheetData.forEach(function(row) {
+        var email = row["Email address"];
+        if (!email) return; // Skip if there is no email address.
+        
+        // If this email hasn't been encountered yet, initialize its record.
+        if (!studentData[email]) {
+          studentData[email] = {
+            count: 0,
+            // Store the name from the manual entry (if provided)
+            name: row["Data Collector Name / Veri Toplayan Kişinin Adı"] || ""
+          };
+        }
+        studentData[email].count++;
+      });
+
+      // Display each email's progress on the page.
+      var container = document.getElementById('progress-bars');
+      container.innerHTML = ''; // Clear any existing content
+
+      // For each unique email address, create a progress bar.
+      Object.keys(studentData).forEach(function(email) {
+        var count = studentData[email].count;
+        var name = studentData[email].name;
+        var percentage = Math.min(100, (count / 200) * 100);
+
+        // Create a container div for each person's progress bar.
+        var studentDiv = document.createElement('div');
+        studentDiv.classList.add('progress-container');
+
+        // Create a header showing the email (with name in parentheses, if available) and the progress count.
+        var header = document.createElement('h5');
+        header.classList.add('student-name');
+        var displayName = email;
+        if (name && name.trim() !== "") {
+          displayName += " (" + name + ")";
+        }
+        header.textContent = displayName + ' - ' + count + '/200';
+        studentDiv.appendChild(header);
+
+        // Create the progress bar using Bootstrap markup.
+        var progressDiv = document.createElement('div');
+        progressDiv.classList.add('progress');
+
+        var progressBarDiv = document.createElement('div');
+        progressBarDiv.classList.add('progress-bar');
+        progressBarDiv.setAttribute('role', 'progressbar');
+        progressBarDiv.setAttribute('aria-valuenow', percentage);
+        progressBarDiv.setAttribute('aria-valuemin', '0');
+        progressBarDiv.setAttribute('aria-valuemax', '100');
+        progressBarDiv.style.width = percentage + '%';
+        progressBarDiv.textContent = Math.floor(percentage) + '%';
+
+        progressDiv.appendChild(progressBarDiv);
+        studentDiv.appendChild(progressDiv);
+
+        // Append the person's progress container to the main container.
+        container.appendChild(studentDiv);
+      });
+    }
+  </script>
+</body>
+</html>
