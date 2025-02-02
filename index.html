@@ -61,7 +61,8 @@
       // For example, if your sheet URL is:
       // https://docs.google.com/spreadsheets/d/1A2B3C4D5E6F7G8H9I0J/pubhtml
       // then YOUR_SHEET_ID is "1A2B3C4D5E6F7G8H9I0J"
-      const publicSpreadsheetUrl = 'https://docs.google.com/spreadsheets/d/1NY6vt_qQc_gtVFv-mvZAezvEtyEQgwhWBptoaDXd2jA/edit?gid=0#gid=0';
+      const publicSpreadsheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRNz2GQabRZPmiEIoF8VQlc05pHNJYwgc3uYWH2jYxddUTFdMDS5jXwD9iZHydxQ5sUCAMn-h9YLofE/pubhtml
+';
 
       // Fetch data from the published spreadsheet,
       // specifying that we want data from the sheet named "Sheet1".
@@ -69,7 +70,7 @@
         key: publicSpreadsheetUrl,
         callback: processData,
         wanted: ["Sheet1"],
-        simpleSheet: true  // Set to false to target a specific sheet.
+        simpleSheet: false  // Set to false to target a specific sheet.
       });
     }
 
