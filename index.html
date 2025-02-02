@@ -92,7 +92,6 @@
       // Prepare a combined list of students to display:
       // Start with the trusted students.
       const studentsToDisplay = [];
-
       Object.keys(trustedStudents).forEach(function(email) {
         studentsToDisplay.push({
           email: email,
@@ -111,6 +110,11 @@
             count: studentCounts[student.email] || 0
           });
         }
+      });
+
+      // Sort students in descending order based on the number of collected products.
+      studentsToDisplay.sort(function(a, b) {
+        return b.count - a.count;
       });
 
       // Display each student's progress using Bootstrap progress bars.
